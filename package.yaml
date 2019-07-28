@@ -1,5 +1,5 @@
 name:                opdt
-version:             0.1.0.0
+version:             0.1.0.1
 github:              "githubuser/opdt"
 license:             BSD3
 author:              "Author name here"
@@ -24,7 +24,6 @@ dependencies:
 - optparse-applicative
 - text
 - process
-- process-extras
 
 library:
   source-dirs: src
