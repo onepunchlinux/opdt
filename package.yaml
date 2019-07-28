@@ -22,12 +22,15 @@ description:         Please see the README on GitHub at <https://github.com/onep
 dependencies:
 - base >= 4.7 && < 5
 - optparse-applicative
+- text
+- process
+- process-extras
 
 library:
   source-dirs: src
 
 executables:
-  opdt-exe:
+  opdt:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
