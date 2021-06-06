@@ -4,3 +4,4 @@ opdt.cabal
 .envrc
 dist-newstyle/
 dist/
+result/
