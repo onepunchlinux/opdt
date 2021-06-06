@@ -24,6 +24,16 @@ dependencies:
 - optparse-applicative
 - text
 - process
+- containers
+- dhall
+- aeson
+- aeson-yaml
+- bytestring
+- directory
+- raw-strings-qq
+- string-interpolate
+- filepath
+- process
 
 library:
   source-dirs: src

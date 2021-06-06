@@ -1,3 +1,6 @@
 .stack-work/
 opdt.cabal
 *~
+.envrc
+dist-newstyle/
+dist/

@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric     #-}
+
 -- | 
 
 module CLI.Main
@@ -6,21 +8,60 @@ module CLI.Main
   ) where
 
 import Options.Applicative
-import CLI.Audio
 import Control.Monad
 import Data.List
 import Data.Text (Text)
 import Data.Maybe
 import qualified Data.Text as T
+import qualified Data.Map as M
+import qualified Data.ByteString.Lazy as BS
 import System.Process
+import Dhall (Generic, FromDhall)
+import qualified Dhall as D
+import Data.Aeson
+import qualified Data.Aeson.Yaml as Yaml
+import System.Directory
+
+import CLI.CLI (cliParser, Opts(..))
+import CLI.Audio
+import Data.Theme
+import CLI.Emacs (setThemeFile, reloadTheme)
 
 main :: IO ()
-main = runAudio =<< execParser opts
+main = runCLI =<< execParser opts
   where
-    opts = info (adjustVolumeParser <**> helper)
+    opts = info (cliParser <**> helper)
       ( fullDesc
      <> progDesc "Tools for managing a linux desktop"
      <> header "One Punch Desktop Tools" )
+
+runCLI :: Opts -> IO ()
+runCLI (VolumeOpts vOpts) = runAudio vOpts
+runCLI (ThemeOpts tOpts) = runTheme tOpts
+
+runTheme :: Text -> IO ()
+runTheme themeName = do
+  cfg <- D.input D.auto "~/.config/opdt/config.dhall"
+  case M.lookup themeName (themes cfg) of
+    Nothing -> error $ T.unpack ("theme " <> themeName <> " not found")
+    (Just theme) -> do
+      setAlacrittyTheme theme
+      setEmacsTheme theme
+
+setAlacrittyTheme :: Theme -> IO ()
+setAlacrittyTheme theme = do
+  let alacrittyTheme = Yaml.encode (AlacrittyConfig (AlacrittyColors
+                                                     { primary = primaryColors theme
+                                                     , normal = normalColors theme
+                                                     , bright = brightColors theme
+                                                     }))
+  homeDir <- getHomeDirectory
+  BS.writeFile (homeDir ++ "/.config/opdt/alacritty-theme.yml") alacrittyTheme 
+
+setEmacsTheme :: Theme -> IO ()
+setEmacsTheme theme = do
+  setThemeFile theme
+  reloadTheme
 
 runAudio :: AdjustVolume -> IO ()
 runAudio adjustOption = do

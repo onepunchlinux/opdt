@@ -1,19 +1,22 @@
-{ mkDerivation, base, hpack, optparse-applicative, process, stdenv
-, text
-}:
-mkDerivation {
-  pname = "opdt";
-  version = "0.1.0.0";
-  src = ./.;
-  isLibrary = true;
-  isExecutable = true;
-  libraryHaskellDepends = [ base optparse-applicative process text ];
-  libraryToolDepends = [ hpack ];
-  executableHaskellDepends = [
-    base optparse-applicative process text
-  ];
-  testHaskellDepends = [ base optparse-applicative process text ];
-  prePatch = "hpack";
-  homepage = "https://github.com/githubuser/opdt#readme";
-  license = stdenv.lib.licenses.bsd3;
+{ compiler ? "ghc8104" }:
+let
+  config = {
+    packageOverrides = pkgs: rec {
+      haskellPackages = pkgs.haskellPackages.override {
+        overrides = new: old: rec {
+          opdt = with pkgs.haskell.lib; dontCheck (dontHaddock (new.callPackage ./nix/opdt.nix {}));
+        };
+      };
+
+      shell = pkgs.mkShell {
+        buildInputs = with pkgs.haskellPackages; [ cabal-install haskell-language-server ];
+        inputsFrom = [ haskellPackages.opdt.env ];
+      };
+    };
+  };
+  pkgs = import (fetchGit (import ./version.nix)) { inherit config; };
+
+in {
+  opdt = pkgs.haskellPackages.opdt;
+  shell = pkgs.shell;
 }
