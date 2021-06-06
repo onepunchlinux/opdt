@@ -5,7 +5,7 @@
 mkDerivation {
   pname = "opdt";
   version = "0.1.0.2";
-  src = ./.;
+  src = ../.;
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
